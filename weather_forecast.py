@@ -8,24 +8,31 @@ class Process:
 
 class Text:
     start_text = """Print '1' to get your local weather\n
-              Print '2' to get weather of any city you want\n
-              Print '3' to get access to your requests story"""
+    Print '2' to get weather of any city you want\n
+    Print '3' to get access to your requests story"""
     restart_text = "Do you want to restart? y/n"
     wrong_text = "You printed stuff out of offered options, try again"
+    print_city_name_text = "Print city name"
+    wrong_city_name = """В названии была допущена ошибка\n
+    Введите правильное название города"""
 
 
 def get_local_weather():
-    coordinates = services.get_user_coordinates()
-    weather = services.get_weather(coordinates)
+    user_coordinates = services.get_user_coordinates()
+    weather = services.get_weather(user_coordinates)
     print(services.format_weather(weather))
-    # print(format_weather(weather))
 
 
 def get_city_weather():
-    coordinates = services.get_user_coordinates()
-    weather = services.get_weather(coordinates)
-    print(weather)
-    # print(format_weather(weather))
+    print(Text.print_city_name_text)
+    city_name = input()
+    city_coordinates = services.get_city_coordinates(city_name)
+    while city_coordinates == "error":
+        print(Text.wrong_city_name)
+        city_name = input()
+        city_coordinates = services.get_city_coordinates(city_name)
+    weather = services.get_weather(city_coordinates)
+    print(services.format_weather(weather))
 
 
 def get_weather_requests_history():
