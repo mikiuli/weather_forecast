@@ -14,24 +14,40 @@ class Text:
     wrong_text = "You printed stuff out of offered options, try again"
 
 
+def get_local_weather():
+    coordinates = services.get_user_coordinates()
+    weather = services.get_weather(coordinates)
+    print(services.format_weather(weather))
+    # print(format_weather(weather))
+
+
+def get_city_weather():
+    coordinates = services.get_user_coordinates()
+    weather = services.get_weather(coordinates)
+    print(weather)
+    # print(format_weather(weather))
+
+
+def get_weather_requests_history():
+    pass
+
+
+def choose_options(user_input: str) -> None:
+    if user_input == '1':
+        get_local_weather()
+    elif user_input == '2':
+        get_city_weather()
+    else:
+        get_weather_requests_history()
+
+
 def main() -> None:
     process = Process.start
     while process:
         print(Text.start_text)
         user_input = input()
         if user_input in {'1', '2', '3'}:
-            if user_input == '1':
-                coordinates = services.get_user_coordinates()
-                weather = services.get_weather(coordinates)
-                print(services.format_weather(weather))
-                # print(format_weather(weather))
-            elif user_input == '2':
-                coordinates = services.get_user_coordinates()
-                weather = services.get_weather(coordinates)
-                print(weather)
-                # print(format_weather(weather))
-            else:
-                pass
+            choose_options(user_input)
             print(Text.restart_text)
             restart = input()
             while restart.lower() not in {'y', 'n'}:

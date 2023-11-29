@@ -73,8 +73,6 @@ def _parse_openweather_response(openweather_response: str) -> Weather:
 
 def _parse_current_time(openweather_dict: dict) -> datetime:
     date = datetime.utcfromtimestamp(openweather_dict["dt"])
-    print(date)
-    print(date.astimezone())
     return date.astimezone()
 
 
