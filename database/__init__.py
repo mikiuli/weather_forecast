@@ -1,3 +1,6 @@
-from database.database import get_last_three_queries
+from database.database import save_weather_request, get_last_requests
+from database.database import create_database
+from database import exceptions
 
-all = [get_last_three_queries, ]
+__all__ = [save_weather_request, get_last_requests, create_database,
+           exceptions]

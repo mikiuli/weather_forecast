@@ -1,8 +1,10 @@
-from services.weather_api_service import Weather, Celsius
+from datetime import datetime
+
+from services.weather_api_service import Weather, Celsius, Unix_time
 
 
 def format_weather(weather: Weather) -> str:
-    return (f"Текущее время: {weather.current_time}\n"
+    return (f"Текущее время: {_format_time(weather.current_time)}\n"
             f"Название города: {weather.city}\n"
             f"Погодные условия: {weather.weather_type}\n"
             f"Текущая температура: {weather.temperature} "
@@ -22,3 +24,8 @@ def _format_gradus_ending(temp: Celsius) -> str:
         return "a"
     else:
         return "ов"
+
+
+def _format_time(time: Unix_time) -> datetime:
+    date = datetime.utcfromtimestamp(time)
+    return date.astimezone()

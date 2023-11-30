@@ -1,6 +1,5 @@
 import requests
 
-from datetime import datetime
 from dataclasses import dataclass
 from enum import Enum
 import json
@@ -14,6 +13,7 @@ from services.exceptions import APIServiseError
 
 Celsius: TypeAlias = int
 metres_per_sec: TypeAlias = int
+Unix_time: TypeAlias = int
 
 
 class WeatherType(str, Enum):
@@ -28,7 +28,7 @@ class WeatherType(str, Enum):
 
 @dataclass(slots=True, frozen=True)
 class Weather:
-    current_time: datetime
+    current_time: Unix_time
     city: str
 
     weather_type: WeatherType
@@ -71,9 +71,8 @@ def _parse_openweather_response(openweather_response: str) -> Weather:
     )
 
 
-def _parse_current_time(openweather_dict: dict) -> datetime:
-    date = datetime.utcfromtimestamp(openweather_dict["dt"])
-    return date.astimezone()
+def _parse_current_time(openweather_dict: dict) -> Unix_time:
+    return openweather_dict["dt"]
 
 
 def _parse_city_name(openweather_dict: dict) -> str:
