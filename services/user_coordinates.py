@@ -1,6 +1,6 @@
-"""Returns current coordinates of user's device using IPInfo module"""
+"""Возвращает текущие координаты пользователя, используя библиотеку geocoder"""
 
-import ipinfo
+import geocoder
 
 from dataclasses import dataclass
 
@@ -15,29 +15,34 @@ class Coordinates:
 
 
 def get_user_coordinates() -> Coordinates:
-
-    """Returns current user coordinates using IPinfo"""
-
-    coordinates = _get_IPinfo()
+    """
+    Получает округленные или нет координаты пользователя
+    params: -
+    returns: Координаты пользователя в виде класса Coordinates
+    """
+    coordinates = _get_coordinates()
     return _round_gps_coordinates(coordinates)
 
 
-def _get_IPinfo() -> Coordinates:
-    access_token = services.config.IPINFO_ACCESS_TOKEN
-
+def _get_coordinates() -> Coordinates:
+    """
+    Получает координаты пользователя с помощью geocoder
+    params: -
+    returns: Координаты пользователя в виде класса Coordinates
+    """
     try:
-        handler = ipinfo.getHandler(access_token)
-        details = handler.getDetails()
-        latitude = float(details.latitude)
-        longitude = float(details.longitude)
-
-        return Coordinates(latitude=latitude, longitude=longitude)
-
+        coordinates = geocoder.ip("me")
+        return Coordinates(latitude=coordinates.lat, longitude=coordinates.lng)
     except Exception:
         raise CantGetCoordinates
 
 
 def _round_gps_coordinates(coordinates: Coordinates) -> Coordinates:
+    """
+    Округляет координаты, если это задано в config.py
+    params: Координаты пользователя в виде класса Coordinates
+    returns: Округленные координаты пользователя в виде класса Coordinates
+    """
     if not services.config.USE_ROUND_COORDS:
         return coordinates
     return Coordinates(*map(lambda c: round(c, 1), [coordinates.latitude,

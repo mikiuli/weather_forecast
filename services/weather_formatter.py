@@ -4,6 +4,11 @@ from services.weather_api_service import Weather, Celsius, Unix_time
 
 
 def format_weather(weather: Weather) -> str:
+    """
+    Преобразует данные из класса Weather в строку заданного формата
+    params: weather: информация о погоде в виде класса Weather
+    returns: строку заданного формата
+    """
     return (f"Текущее время: {_format_time(weather.current_time)}\n"
             f"Название города: {weather.city}\n"
             f"Погодные условия: {weather.weather_type}\n"
@@ -16,6 +21,12 @@ def format_weather(weather: Weather) -> str:
 
 
 def _format_gradus_ending(temp: Celsius) -> str:
+    """
+    Изменяет окончание слова "градус" в зависимости от числительного
+    перед ним
+    params: temp: температура в цельсиях
+    returns: окончание для слова "градус"
+    """
     if str(temp)[-1] == "1" and abs(temp) != 11:
         return ""
     elif (str(temp)[-1] in
@@ -27,5 +38,10 @@ def _format_gradus_ending(temp: Celsius) -> str:
 
 
 def _format_time(time: Unix_time) -> datetime:
+    """
+    Меняет время формата юникс на формат ЧЧ:ММ:СС+ЧЧ:ММ
+    params: time: время формата юникс
+    returns: время в формате datetime
+    """
     date = datetime.utcfromtimestamp(time)
     return date.astimezone()

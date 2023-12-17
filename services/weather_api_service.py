@@ -1,7 +1,6 @@
 import requests
 
 from dataclasses import dataclass
-from enum import Enum
 import json
 from json.decoder import JSONDecodeError
 
@@ -16,29 +15,24 @@ metres_per_sec: TypeAlias = int
 Unix_time: TypeAlias = int
 
 
-class WeatherType(str, Enum):
-    THUNDERSTORM = "Гроза"
-    DRIZZLE = "Изморозь"
-    RAIN = "Дождь"
-    SNOW = "Снег"
-    CLEAR = "Ясно"
-    FOG = "Туман"
-    CLOUDS = "Облачно"
-
-
 @dataclass(slots=True, frozen=True)
 class Weather:
     current_time: Unix_time
     city: str
 
-    weather_type: WeatherType
+    weather_type: str
     temperature: Celsius
     temperature_feels_like: Celsius
     wind_speed: metres_per_sec
 
 
 def get_weather(coordinates: Coordinates) -> Weather:
-    """Requests weather in OpenWeather API and returns it"""
+    """
+    Получает прогноз погоды от вебсервиса OpenWeather и
+    возвращает в виде класса Weather
+    params: coordinates: широта и долгота в виде класса Coordinates
+    returns: погоду в виде класса Weather
+    """
     openweather_response = _get_openweather_response(
         longitude=coordinates.longitude, latitude=coordinates.latitude
     )
@@ -47,16 +41,29 @@ def get_weather(coordinates: Coordinates) -> Weather:
 
 
 def _get_openweather_response(latitude: float, longitude: float) -> str:
+    """
+    Получает ответ от сервера, райзит ошибку, если соединения нет
+    params: latitude: широта, longitude: долгота
+    returns: Возвращает тело полученного ответа в виде текса
+    """
     url = services.config.OPENWEATHER_URL.format(latitude=latitude,
                                                  longitude=longitude)
     response = requests.get(url=url)
     try:
-        return response.text
-    except requests.exceptions.HTTPError:
+        if response.status_code == 200:
+            return response.text
+        else:
+            raise APIServiseError
+    except requests.exceptions.Timeout(3):
         raise APIServiseError
 
 
 def _parse_openweather_response(openweather_response: str) -> Weather:
+    """
+    Превращает текстовый ответ сервера в словарь и парсит его
+    params: openweather_response: тело полученного ответа в виде текса
+    returns: погоду в виде класса Weather
+    """
     try:
         openweather_dict = json.loads(openweather_response)
     except JSONDecodeError:
@@ -72,40 +79,72 @@ def _parse_openweather_response(openweather_response: str) -> Weather:
 
 
 def _parse_current_time(openweather_dict: dict) -> Unix_time:
-    return openweather_dict["dt"]
+    """
+    Получает текущее время из словаря
+    params: openweather_dict: словарь
+    returns: время в юникс формате
+    """
+    try:
+        return openweather_dict["dt"]
+    except KeyError:
+        raise APIServiseError
 
 
 def _parse_city_name(openweather_dict: dict) -> str:
-    return openweather_dict["name"]
+    """
+    Получает имя города
+    params: openweather_dict: словарь
+    returns: имя города
+    """
+    try:
+        return openweather_dict["name"]
+    except KeyError:
+        raise APIServiseError
 
 
 def _parse_temperature(openweather_dict: dict) -> Celsius:
-    return round(openweather_dict["main"]["temp"])
+    """
+    Получает температуру
+    params: openweather_dict: словарь
+    returns: температуру в цельсиях
+    """
+    try:
+        return round(openweather_dict["main"]["temp"])
+    except KeyError:
+        raise APIServiseError
 
 
 def _parse_temp_feels_like(openweather_dict) -> Celsius:
-    return round(openweather_dict["main"]["feels_like"])
+    """
+    Получает температуру "ощущается как"
+    params: openweather_dict: словарь
+    returns: температуру "ощущается как"
+    """
+    try:
+        return round(openweather_dict["main"]["feels_like"])
+    except KeyError:
+        raise APIServiseError
 
 
 def _parse_wind_speed(openweather_dict: dict) -> metres_per_sec:
-    return round(openweather_dict["wind"]["speed"])
-
-
-def _parse_weather_type(openweather_dict: dict) -> WeatherType:
+    """
+    Получает скорость ветра
+    params: openweather_dict: словарь
+    returns: скорость ветра
+    """
     try:
-        weather_type_id = (str(openweather_dict["weather"][0]["id"]))
-    except (IndexError, KeyError):
+        return round(openweather_dict["wind"]["speed"])
+    except KeyError:
         raise APIServiseError
-    weather_types = {
-        "1": WeatherType.THUNDERSTORM,
-        "3": WeatherType.DRIZZLE,
-        "5": WeatherType.RAIN,
-        "6": WeatherType.SNOW,
-        "7": WeatherType.FOG,
-        "800": WeatherType.CLEAR,
-        "80": WeatherType.CLOUDS
-    }
-    for _id, _weather_type in weather_types.items():
-        if weather_type_id.startswith(_id):
-            return _weather_type
-    raise APIServiseError
+
+
+def _parse_weather_type(openweather_dict: dict) -> str:
+    """
+    Получает описание погоды
+    params: openweather_dict: словарь
+    returns: один из объектов класса WatherType
+    """
+    try:
+        return str(openweather_dict["weather"][0]["description"])
+    except KeyError:
+        raise APIServiseError()

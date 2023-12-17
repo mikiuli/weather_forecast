@@ -1,6 +1,6 @@
 class CantGetCoordinates(Exception):
-    """Program can't get coordinates"""
+    """Программа не может получить координаты"""
 
 
 class APIServiseError(Exception):
-    """Program can't get current weather"""
+    """Программа не может получить прогноз погоды"""

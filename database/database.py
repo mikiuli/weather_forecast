@@ -23,6 +23,11 @@ SELECT_ALL_QUERY = """SELECT * FROM Weather_requests"""
 
 
 def create_database() -> None:
+    """
+    Создает базу данных
+    params: -
+    returns: -
+    """
     try:
         with sqlite3.connect("weather_forecast.db") as connection:
             cursor = connection.cursor()
@@ -32,6 +37,11 @@ def create_database() -> None:
 
 
 def save_weather_request(weather: Weather) -> None:
+    """
+    Сохраняет запрос пользователя о погоде в базе данных
+    params: weather:  информация о погоде в виде класса Weather
+    returns: -
+    """
     try:
         with sqlite3.connect("weather_forecast.db") as connection:
             cursor = connection.cursor()
@@ -53,6 +63,11 @@ def save_weather_request(weather: Weather) -> None:
 
 
 def get_last_requests() -> list[Weather]:
+    """
+    Даёт информацию о последних n запросах пользователя
+    params: -
+    returns: список запросов, структурно организованных в класс Weather
+    """
     try:
         with sqlite3.connect("weather_forecast.db") as connection:
             cursor = connection.cursor()
@@ -68,6 +83,7 @@ def get_last_requests() -> list[Weather]:
                                   temperature_feels_like=request[5],
                                   wind_speed=request[6])
                 requests_list.append(weather)
+            requests_list.reverse()
         return requests_list
     except Exception:
         raise NoConnectionWithDB
