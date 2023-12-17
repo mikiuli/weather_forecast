@@ -5,4 +5,3 @@ OPENWEATHER_URL = ('https://api.openweathermap.org/data/2.5/weather?'
                    'lon={longitude}&'
                    'appid='+OPENWEATHER_API+'&'
                    'lang=ru&units=metric')
-# IPINFO_ACCESS_TOKEN = "e09747940f90db"
