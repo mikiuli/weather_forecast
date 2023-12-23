@@ -2,48 +2,17 @@
 
 import geocoder
 
-from dataclasses import dataclass
-
-from services.exceptions import CantGetCoordinates
-import services.config
+from services.exceptions import CantGetCity
 
 
-@dataclass(slots=True, frozen=True)
-class Coordinates:
-    latitude: float
-    longitude: float
-
-
-def get_user_coordinates() -> Coordinates:
+def get_user_city_name() -> str:
     """
-    Получает округленные или нет координаты пользователя
+    Получает название города пользователя с помощью geocoder
     params: -
-    returns: Координаты пользователя в виде класса Coordinates
-    """
-    coordinates = _get_coordinates()
-    return _round_gps_coordinates(coordinates)
-
-
-def _get_coordinates() -> Coordinates:
-    """
-    Получает координаты пользователя с помощью geocoder
-    params: -
-    returns: Координаты пользователя в виде класса Coordinates
+    returns: Название города в виде строки
     """
     try:
         coordinates = geocoder.ip("me")
-        return Coordinates(latitude=coordinates.lat, longitude=coordinates.lng)
+        return coordinates.city
     except Exception:
-        raise CantGetCoordinates
-
-
-def _round_gps_coordinates(coordinates: Coordinates) -> Coordinates:
-    """
-    Округляет координаты, если это задано в config.py
-    params: Координаты пользователя в виде класса Coordinates
-    returns: Округленные координаты пользователя в виде класса Coordinates
-    """
-    if not services.config.USE_ROUND_COORDS:
-        return coordinates
-    return Coordinates(*map(lambda c: round(c, 1), [coordinates.latitude,
-                                                    coordinates.longitude]))
+        raise CantGetCity

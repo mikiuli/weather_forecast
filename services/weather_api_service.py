@@ -6,7 +6,8 @@ from json.decoder import JSONDecodeError
 
 from typing import TypeAlias
 
-from services.user_coordinates import Coordinates
+from http import HTTPStatus
+
 import services.config
 from services.exceptions import APIServiseError
 
@@ -26,36 +27,37 @@ class Weather:
     wind_speed: metres_per_sec
 
 
-def get_weather(coordinates: Coordinates) -> Weather:
+def get_weather(city_name: str) -> Weather:
     """
     Получает прогноз погоды от вебсервиса OpenWeather и
     возвращает в виде класса Weather
-    params: coordinates: широта и долгота в виде класса Coordinates
+    params: city_name: имя города, погоду в котором хочет получить пользователь
     returns: погоду в виде класса Weather
     """
     openweather_response = _get_openweather_response(
-        longitude=coordinates.longitude, latitude=coordinates.latitude
+        city_name=city_name
     )
     weather = _parse_openweather_response(openweather_response)
     return weather
 
 
-def _get_openweather_response(latitude: float, longitude: float) -> str:
+def _get_openweather_response(city_name: str) -> str:
     """
-    Получает ответ от сервера, райзит ошибку, если соединения нет
-    params: latitude: широта, longitude: долгота
+    Получает ответ от сервера, райзит ошибку, если проблемы с соединением
+    params: city_name: имя города, погоду в котором хочет получить пользователь
     returns: Возвращает тело полученного ответа в виде текса
     """
-    url = services.config.OPENWEATHER_URL.format(latitude=latitude,
-                                                 longitude=longitude)
+    url = services.config.OPENWEATHER_URL.format(city_name=city_name)
     response = requests.get(url=url)
     try:
-        if response.status_code == 200:
+        if response.status_code == HTTPStatus.OK:
             return response.text
+        elif response.status_code == 404:
+            raise APIServiseError()
         else:
-            raise APIServiseError
-    except requests.exceptions.Timeout(3):
-        raise APIServiseError
+            raise APIServiseError()
+    except requests.exceptions.Timeout:
+        raise APIServiseError()
 
 
 def _parse_openweather_response(openweather_response: str) -> Weather:

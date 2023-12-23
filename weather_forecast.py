@@ -32,8 +32,8 @@ def get_local_weather() -> None:
     params: -
     returns: -
     """
-    user_coordinates = services.get_user_coordinates()
-    weather = services.get_weather(user_coordinates)
+    user_city_name = services.get_user_city_name()
+    weather = services.get_weather(user_city_name)
     database.save_weather_request(weather)
     print(services.format_weather(weather))
 
@@ -46,12 +46,7 @@ def get_city_weather() -> None:
     """
     print(Text.print_city_name_text)
     city_name = input().strip()
-    city_coordinates = services.get_city_coordinates(city_name)
-    while city_coordinates == "error":
-        print(Text.wrong_city_name_text)
-        city_name = input()
-        city_coordinates = services.get_city_coordinates(city_name)
-    weather = services.get_weather(city_coordinates)
+    weather = services.get_weather(city_name)
     database.save_weather_request(weather)
     print(services.format_weather(weather))
 
@@ -90,8 +85,11 @@ def main() -> None:
             print(Text.wrong_text)
 
 
+# if __name__ == "__main__":
+#     try:
+#         main()
+#     except Exception:
+#         print(Text.app_cant_work_text)
+
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception:
-        print(Text.app_cant_work_text)
+    main()
