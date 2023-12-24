@@ -17,7 +17,7 @@ def format_weather(weather: Weather) -> str:
             f"Ощущается как: {weather.temperature_feels_like} "
             f"градус{_format_gradus_ending(weather.temperature_feels_like)}"
             " по цельсию\n"
-            f"Скорость ветра: {weather.wind_speed} м/с")
+            f"Скорость ветра: {weather.wind_speed} м/с\n")
 
 
 def _format_gradus_ending(temp: Celsius) -> str:

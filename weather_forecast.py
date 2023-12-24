@@ -10,12 +10,13 @@ class Text:
                   "Напишите '2', чтобы получить погоду в любом другом городе\n"
                   "Напишите '3', чтобы посмотреть историю запросов\n"
                   "Напишите '4', чтобы выйти из приложения")
-    wrong_text = "Вы написали что-то не то, попроуйте ещё раз"
+    wrong_text = "Вы написали что-то не то, попробуйте ещё раз"
     print_city_name_text = "Напишите название города"
     wrong_city_name_text = ("В названии была допущена ошибка\n"
                             "Введите правильное название города")
-    app_cant_work_text = ("К сожалению, по неизвестным причинам "
-                          "приложение не работает")
+    app_cant_work_text = ("К сожалению, приложение не может продолжать "
+                          "свою работу.\n"
+                          "Перезапустите его и выполните запрос заново")
 
 
 class Actions(StrEnum):
@@ -47,6 +48,10 @@ def get_city_weather() -> None:
     print(Text.print_city_name_text)
     city_name = input().strip()
     weather = services.get_weather(city_name)
+    while weather == 404:
+        print(Text.wrong_city_name_text)
+        city_name = input().strip()
+        weather = services.get_weather(city_name)
     database.save_weather_request(weather)
     print(services.format_weather(weather))
 
@@ -60,7 +65,6 @@ def get_weather_requests_history() -> None:
     last_requests = database.get_last_requests()
     for request in last_requests:
         print(services.format_weather(request))
-        print("\n")
 
 
 def exit_app() -> None:
@@ -85,11 +89,8 @@ def main() -> None:
             print(Text.wrong_text)
 
 
-# if __name__ == "__main__":
-#     try:
-#         main()
-#     except Exception:
-#         print(Text.app_cant_work_text)
-
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception:
+        print(Text.app_cant_work_text)

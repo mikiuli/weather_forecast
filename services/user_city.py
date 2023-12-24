@@ -15,4 +15,4 @@ def get_user_city_name() -> str:
         coordinates = geocoder.ip("me")
         return coordinates.city
     except Exception:
-        raise CantGetCity
+        raise CantGetCity()

@@ -9,7 +9,7 @@ from typing import TypeAlias
 from http import HTTPStatus
 
 import services.config
-from services.exceptions import APIServiseError
+from services import exceptions
 
 Celsius: TypeAlias = int
 metres_per_sec: TypeAlias = int
@@ -37,8 +37,11 @@ def get_weather(city_name: str) -> Weather:
     openweather_response = _get_openweather_response(
         city_name=city_name
     )
-    weather = _parse_openweather_response(openweather_response)
-    return weather
+    if isinstance(openweather_response, int):
+        return openweather_response
+    else:
+        weather = _parse_openweather_response(openweather_response)
+        return weather
 
 
 def _get_openweather_response(city_name: str) -> str:
@@ -48,16 +51,25 @@ def _get_openweather_response(city_name: str) -> str:
     returns: Возвращает тело полученного ответа в виде текса
     """
     url = services.config.OPENWEATHER_URL.format(city_name=city_name)
-    response = requests.get(url=url)
     try:
-        if response.status_code == HTTPStatus.OK:
-            return response.text
-        elif response.status_code == 404:
-            raise APIServiseError()
-        else:
-            raise APIServiseError()
+        response = requests.get(url=url, timeout=3)
     except requests.exceptions.Timeout:
-        raise APIServiseError()
+        print("Слишком долгое время ожидания ответа сервера")
+        raise exceptions.TimeoutServiceError()
+
+    if response.status_code == HTTPStatus.OK:
+        return response.text
+    elif response.status_code == HTTPStatus.NOT_FOUND:
+        return response.status_code
+    elif response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR:
+        print("На сервере произошла ошибка, запрос не может быть обработан")
+        raise exceptions.APIServiceError()
+    elif response.status_code == HTTPStatus.SERVICE_UNAVAILABLE:
+        print("Сервер перегружен или находится на техническом обслуживании")
+        raise exceptions.OverloadServiseError()
+    else:
+        print("По неизвестным причинам прогноз погоды получить невозможно")
+        raise exceptions.BaseError()
 
 
 def _parse_openweather_response(openweather_response: str) -> Weather:
@@ -69,7 +81,9 @@ def _parse_openweather_response(openweather_response: str) -> Weather:
     try:
         openweather_dict = json.loads(openweather_response)
     except JSONDecodeError:
-        raise APIServiseError
+        print("""По неизвестным причинам прогноз погоды получить невозможно,
+              попробуйте повторить запрос через некоторое время""")
+        raise exceptions.APIServiceError()
     return Weather(
         current_time=_parse_current_time(openweather_dict),
         city=_parse_city_name(openweather_dict),
@@ -89,7 +103,7 @@ def _parse_current_time(openweather_dict: dict) -> Unix_time:
     try:
         return openweather_dict["dt"]
     except KeyError:
-        raise APIServiseError
+        raise exceptions.BaseError()
 
 
 def _parse_city_name(openweather_dict: dict) -> str:
@@ -101,7 +115,7 @@ def _parse_city_name(openweather_dict: dict) -> str:
     try:
         return openweather_dict["name"]
     except KeyError:
-        raise APIServiseError
+        raise exceptions.BaseError()
 
 
 def _parse_temperature(openweather_dict: dict) -> Celsius:
@@ -113,7 +127,7 @@ def _parse_temperature(openweather_dict: dict) -> Celsius:
     try:
         return round(openweather_dict["main"]["temp"])
     except KeyError:
-        raise APIServiseError
+        raise exceptions.BaseError()
 
 
 def _parse_temp_feels_like(openweather_dict) -> Celsius:
@@ -125,7 +139,7 @@ def _parse_temp_feels_like(openweather_dict) -> Celsius:
     try:
         return round(openweather_dict["main"]["feels_like"])
     except KeyError:
-        raise APIServiseError
+        raise exceptions.BaseError()
 
 
 def _parse_wind_speed(openweather_dict: dict) -> metres_per_sec:
@@ -137,7 +151,7 @@ def _parse_wind_speed(openweather_dict: dict) -> metres_per_sec:
     try:
         return round(openweather_dict["wind"]["speed"])
     except KeyError:
-        raise APIServiseError
+        raise exceptions.BaseError()
 
 
 def _parse_weather_type(openweather_dict: dict) -> str:
@@ -149,4 +163,4 @@ def _parse_weather_type(openweather_dict: dict) -> str:
     try:
         return str(openweather_dict["weather"][0]["description"])
     except KeyError:
-        raise APIServiseError()
+        raise exceptions.BaseError()
