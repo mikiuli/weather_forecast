@@ -33,7 +33,8 @@ def create_database() -> None:
             cursor = connection.cursor()
             cursor.execute(CREATE_TABLE_QUERY)
     except Exception:
-        raise NoConnectionWithDB
+        print("Нет связи с базой данных")
+        raise NoConnectionWithDB()
 
 
 def save_weather_request(weather: Weather) -> None:
@@ -59,7 +60,8 @@ def save_weather_request(weather: Weather) -> None:
 
             connection.commit()
     except Exception:
-        raise NoConnectionWithDB
+        print("Нет связи с базой данных")
+        raise NoConnectionWithDB()
 
 
 def get_last_requests() -> list[Weather]:
@@ -86,4 +88,5 @@ def get_last_requests() -> list[Weather]:
             requests_list.reverse()
         return requests_list
     except Exception:
-        raise NoConnectionWithDB
+        print("Нет связи с базой данных")
+        raise NoConnectionWithDB()
