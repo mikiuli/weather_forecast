@@ -7,9 +7,10 @@ from enum import StrEnum
 import sys
 from functools import wraps
 from typing import Callable, Any
+from http import HTTPStatus
 
 
-class Text:
+class Text():
     start_text = ("Напишите '1', чтобы получить погоду в вашем городе\n"
                   "Напишите '2', чтобы получить погоду в любом другом городе\n"
                   "Напишите '3', чтобы посмотреть историю запросов\n"
@@ -42,12 +43,13 @@ def errors_manager(custom_exceptions: tuple[Any, ...]) -> Callable:
     """
     def decorator(func) -> Callable:
         @wraps(func)
-        def wrapper(*args, **kwargs) -> None:
+        def wrapper(*args, **kwargs) -> Callable:
             try:
                 func(*args, **kwargs)
             except custom_exceptions as e:
                 print(e)
                 exit_app()
+            return func
         return wrapper
     return decorator
 
@@ -76,7 +78,7 @@ def get_city_weather(connection: sqlite3.Connection) -> None:
     print(Text.print_city_name_text)
     city_name = input().strip().lower()
     weather = services.get_weather(city_name)
-    while weather == 404:
+    while weather == HTTPStatus.NOT_FOUND:
         print(Text.wrong_city_name_text)
         city_name = input().strip().lower()
         weather = services.get_weather(city_name)
