@@ -14,5 +14,5 @@ def get_user_city_name() -> str:
     try:
         coordinates = geocoder.ip("me")
         return coordinates.city
-    except KeyError:
+    except AttributeError:
         raise CantGetUserCityError()
