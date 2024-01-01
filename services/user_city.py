@@ -2,7 +2,7 @@
 
 import geocoder
 
-from services.exceptions import CantGetCity
+from services.exceptions import CantGetUserCityError
 
 
 def get_user_city_name() -> str:
@@ -14,5 +14,5 @@ def get_user_city_name() -> str:
     try:
         coordinates = geocoder.ip("me")
         return coordinates.city
-    except Exception:
-        raise CantGetCity()
+    except KeyError:
+        raise CantGetUserCityError()

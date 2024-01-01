@@ -1,3 +1,5 @@
+"""Выводит данные в консоль из объекта класса Weather"""
+
 from datetime import datetime
 
 from services.weather_api_service import Weather, Celsius, Unix_time

@@ -1,9 +1,9 @@
+"""Осуществляет работу с базой данных sqlite3"""
+
 import sqlite3
 
 from services.weather_api_service import Weather
-from database.exceptions import NoConnectionWithDB
-
-REQUESTS_NUMBER = 5
+from database.exceptions import NoConnectionWithDBError
 
 CREATE_TABLE_QUERY = """CREATE TABLE IF NOT EXISTS Weather_requests (
     id INTEGER PRIMARY KEY,
@@ -17,9 +17,11 @@ CREATE_TABLE_QUERY = """CREATE TABLE IF NOT EXISTS Weather_requests (
 COUNT_REQUESTS_QUERY = """SELECT COUNT(*) FROM Weather_requests"""
 INSERT_QUERY = """INSERT INTO Weather_requests (time, city_name, weather_type,
 temperature, temp_feels_like, wind_speed) VALUES (?, ?, ?, ?, ?, ?)"""
-DELETE_FIRST_REQUEST_QUERY = """DELETE FROM Weather_requests
-WHERE id = (SELECT MIN(id) FROM Weather_requests)"""
-SELECT_ALL_QUERY = """SELECT * FROM Weather_requests"""
+DELETE_ALL_REQUESTS_QUERY = """DELETE FROM Weather_requests"""
+SELECT_LAST_N_REQUESTS_QUERY = """SELECT time, city_name, weather_type,
+temperature, temp_feels_like, wind_speed FROM Weather_requests
+ORDER BY id DESC
+LIMIT {number}"""
 
 
 def create_database() -> None:
@@ -32,9 +34,8 @@ def create_database() -> None:
         with sqlite3.connect("weather_forecast.db") as connection:
             cursor = connection.cursor()
             cursor.execute(CREATE_TABLE_QUERY)
-    except Exception:
-        print("Нет связи с базой данных")
-        raise NoConnectionWithDB()
+    except sqlite3.OperationalError:
+        raise NoConnectionWithDBError()
 
 
 def save_weather_request(weather: Weather) -> None:
@@ -46,11 +47,6 @@ def save_weather_request(weather: Weather) -> None:
     try:
         with sqlite3.connect("weather_forecast.db") as connection:
             cursor = connection.cursor()
-            cursor.execute(COUNT_REQUESTS_QUERY)
-            total_requests = cursor.fetchone()[0]
-
-            if total_requests == REQUESTS_NUMBER:
-                cursor.execute(DELETE_FIRST_REQUEST_QUERY)
             cursor.execute(INSERT_QUERY, (weather.current_time,
                                           weather.city,
                                           weather.weather_type,
@@ -59,34 +55,47 @@ def save_weather_request(weather: Weather) -> None:
                                           weather.wind_speed))
 
             connection.commit()
-    except Exception:
-        print("Нет связи с базой данных")
-        raise NoConnectionWithDB()
+    except sqlite3.OperationalError:
+        raise NoConnectionWithDBError()
 
 
-def get_last_requests() -> list[Weather]:
+def get_last_requests(number: int) -> list[Weather]:
     """
-    Даёт информацию о последних n запросах пользователя
-    params: -
-    returns: список запросов, структурно организованных в класс Weather
+    Даёт информацию о последних number запросах пользователя
+    params: number: количество запросов, которое хочет получить пользователь
+    returns: список запросов в виде списка, каждый элемент которого
+    является объектом класса Weather
     """
     try:
         with sqlite3.connect("weather_forecast.db") as connection:
             cursor = connection.cursor()
-            cursor.execute(SELECT_ALL_QUERY)
+            cursor.execute(SELECT_LAST_N_REQUESTS_QUERY.format(number=number))
             weather_requests = cursor.fetchall()
 
             requests_list = []
             for request in weather_requests:
-                weather = Weather(current_time=request[1],
-                                  city=request[2],
-                                  weather_type=request[3],
-                                  temperature=request[4],
-                                  temperature_feels_like=request[5],
-                                  wind_speed=request[6])
+                weather = Weather(current_time=request[0],
+                                  city=request[1],
+                                  weather_type=request[2],
+                                  temperature=request[3],
+                                  temperature_feels_like=request[4],
+                                  wind_speed=request[5])
                 requests_list.append(weather)
-            requests_list.reverse()
         return requests_list
-    except Exception:
-        print("Нет связи с базой данных")
-        raise NoConnectionWithDB()
+    except sqlite3.OperationalError:
+        raise NoConnectionWithDBError()
+
+
+def delete_history() -> None:
+    """
+    Очищает базу данных
+    params: -
+    returns: -
+    """
+    try:
+        with sqlite3.connect("weather_forecast.db") as connection:
+            cursor = connection.cursor()
+            cursor.execute(DELETE_ALL_REQUESTS_QUERY)
+            connection.commit()
+    except sqlite3.OperationalError:
+        raise NoConnectionWithDBError()

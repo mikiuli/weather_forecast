@@ -1,3 +1,6 @@
+"""Получает погоду с сервиса openweathermap с помощью библиотеки requests,
+отправляет в формате Weather"""
+
 import requests
 
 from dataclasses import dataclass
@@ -54,22 +57,17 @@ def _get_openweather_response(city_name: str) -> str:
     try:
         response = requests.get(url=url, timeout=3)
     except requests.exceptions.Timeout:
-        print("Слишком долгое время ожидания ответа сервера")
         raise exceptions.TimeoutServiceError()
-
     if response.status_code == HTTPStatus.OK:
         return response.text
     elif response.status_code == HTTPStatus.NOT_FOUND:
         return response.status_code
+    elif response.status_code == HTTPStatus.UNAUTHORIZED:
+        raise exceptions.WrongAPIError()
     elif response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR:
-        print("На сервере произошла ошибка, запрос не может быть обработан")
         raise exceptions.APIServiceError()
-    elif response.status_code == HTTPStatus.SERVICE_UNAVAILABLE:
-        print("Сервер перегружен или находится на техническом обслуживании")
-        raise exceptions.OverloadServiseError()
     else:
-        print("По неизвестным причинам прогноз погоды получить невозможно")
-        raise exceptions.BaseError()
+        raise exceptions.UnspecifiedError()
 
 
 def _parse_openweather_response(openweather_response: str) -> Weather:
@@ -162,5 +160,5 @@ def _parse_weather_type(openweather_dict: dict) -> str:
     """
     try:
         return str(openweather_dict["weather"][0]["description"])
-    except KeyError:
+    except (KeyError, IndexError):
         raise exceptions.BaseError()

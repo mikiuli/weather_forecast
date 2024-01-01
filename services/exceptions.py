@@ -1,24 +1,38 @@
-class CantGetCity(Exception):
+"""Пользовательские исключения для пакета services"""
+
+
+class CantGetUserCityError(Exception):
     """Программа не может получить название Вашего города"""
-    pass
+    def __init__(self) -> None:
+        message = "Программа не может определить Ваше местоположение"
+        super().__init__(message)
 
 
 class APIServiceError(Exception):
     """На сервере произошла ошибка, запрос не может быть обработан"""
-    pass
+    def __init__(self) -> None:
+        message = "На сервере произошла ошибка, запрос не может быть обработан"
+        super().__init__(message)
 
 
-class OverloadServiseError(Exception):
-    """Сервер перегружен или находится на техническом обслуживании"""
-    pass
+class WrongAPIError(Exception):
+    """Некорректный API ключ"""
+    def __init__(self) -> None:
+        message = "Неверный API ключ, программа не может работать"
+        super().__init__(message)
 
 
 class TimeoutServiceError(Exception):
     """Слишком долгое время ожидания ответа сервера"""
-    pass
+    def __init__(self) -> None:
+        message = "Слишком долгое время ожидания ответа сервера"
+        super().__init__(message)
 
 
-class BaseError(Exception):
+class UnspecifiedError(Exception):
     """По неизвестным причинам прогноз погоды получить невозможно,
     попробуйте повторить запрос через некоторое время"""
-    pass
+    def __init__(self) -> None:
+        message = ("Проблема со связью с сервером, "
+                   "попробуйте перезапустить программу")
+        super().__init__(message)
