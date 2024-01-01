@@ -1,9 +1,12 @@
+import sqlite3
+
 import services
 import database
 
 from enum import StrEnum
 import sys
 from functools import wraps
+from typing import Callable, Any
 
 
 class Text:
@@ -31,10 +34,15 @@ CUSTOM_EXCEPTIONS = (services.exceptions.CantGetUserCityError,
                      database.exceptions.NoConnectionWithDBError)
 
 
-def errors_manager(custom_exceptions):
-    def decorator(func):
+def errors_manager(custom_exceptions: tuple[Any, ...]) -> Callable:
+    """
+    Отлавливает пользовательские ошибки и завершает работу программы
+    params: custom_exceptions: кортеж пользовательских ошибок
+    returns: -
+    """
+    def decorator(func) -> Callable:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> None:
             try:
                 func(*args, **kwargs)
             except custom_exceptions as e:
@@ -45,7 +53,7 @@ def errors_manager(custom_exceptions):
 
 
 @errors_manager(CUSTOM_EXCEPTIONS)
-def get_local_weather() -> None:
+def get_local_weather(connection: sqlite3.Connection) -> None:
     """
     Выводит к консоль информацию о погоде в текущем местоположении
     пользователя
@@ -54,12 +62,12 @@ def get_local_weather() -> None:
     """
     user_city_name = services.get_user_city_name()
     weather = services.get_weather(user_city_name)
-    database.save_weather_request(weather)
+    database.save_weather_request(connection, weather)
     print(services.format_weather(weather))
 
 
 @errors_manager(CUSTOM_EXCEPTIONS)
-def get_city_weather() -> None:
+def get_city_weather(connection: sqlite3.Connection) -> None:
     """
     Выводит в консоль информацию о погоде в заданном пользователем городе
     params: -
@@ -70,14 +78,14 @@ def get_city_weather() -> None:
     weather = services.get_weather(city_name)
     while weather == 404:
         print(Text.wrong_city_name_text)
-        city_name = input().strip()
+        city_name = input().strip().lower()
         weather = services.get_weather(city_name)
-    database.save_weather_request(weather)
+    database.save_weather_request(connection, weather)
     print(services.format_weather(weather))
 
 
 @errors_manager(CUSTOM_EXCEPTIONS)
-def get_weather_requests_history() -> None:
+def get_weather_requests_history(connection: sqlite3.Connection) -> None:
     """
     Выводит в консоль последние n запросов пользователя
     params: -
@@ -92,20 +100,21 @@ def get_weather_requests_history() -> None:
         except TypeError:
             print(Text.wrong_text)
             requests_number = input().strip()
-    last_requests = database.get_last_requests(int(requests_number))
+    last_requests = database.get_last_requests(connection,
+                                               int(requests_number))
     for number, request in enumerate(last_requests, 1):
-        print("------------"+str(number)+"------------")
+        print("--------------"+str(number)+"--------------")
         print(services.format_weather(request))
 
 
 @errors_manager(CUSTOM_EXCEPTIONS)
-def delete_requests_history() -> None:
+def delete_requests_history(connection: sqlite3.Connection) -> None:
     """
     Удаляет все сохранённые запросы из базы данных
     params: -
     returns: -
     """
-    database.delete_history()
+    database.delete_history(connection)
     print(Text.delete_history_text)
 
 
@@ -128,7 +137,6 @@ class Actions(StrEnum):
 
 @errors_manager(CUSTOM_EXCEPTIONS)
 def main() -> None:
-    database.create_database()
     actions = {
         Actions.WEATHER_IN_USER_LOCATION: get_local_weather,
         Actions.WEATHER_IN_CITY: get_city_weather,
@@ -136,14 +144,19 @@ def main() -> None:
         Actions.DELETE_HISTORY: delete_requests_history,
         Actions.APP_EXIT: exit_app
     }
-    while True:
-        print(Text.start_text)
-        user_input = input().strip()
-        if user_input in actions.keys():
-            action = actions.get(user_input)
-            action()
-        else:
-            print(Text.wrong_text)
+    with database.create_connection() as connection:
+        database.create_database(connection)
+        while True:
+            print(Text.start_text)
+            user_input = input().strip()
+            if user_input in actions.keys():
+                action = actions.get(user_input)
+                try:
+                    action(connection)
+                except TypeError:
+                    action()
+            else:
+                print(Text.wrong_text)
 
 
 if __name__ == "__main__":
