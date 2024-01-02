@@ -7,7 +7,7 @@ from database.exceptions import NoConnectionWithDBError
 
 CREATE_TABLE_QUERY = """CREATE TABLE IF NOT EXISTS Weather_requests (
     id INTEGER PRIMARY KEY,
-    time INTEGER NOT NULL,
+    time TEXT NOT NULL,
     city_name TEXT NOT NULL,
     weather_type TEXT NOT NULL,
     temperature INTEGER NOT NULL,

@@ -1,8 +1,6 @@
 """Выводит данные в консоль из объекта класса Weather"""
 
-from datetime import datetime
-
-from services.weather_api_service import Weather, Celsius, Unix_time
+from services.weather_api_service import Weather, Celsius
 
 
 def format_weather(weather: Weather) -> str:
@@ -11,7 +9,7 @@ def format_weather(weather: Weather) -> str:
     params: weather: информация о погоде в виде класса Weather
     returns: строку заданного формата
     """
-    return (f"Текущее время: {_format_time(weather.current_time)}\n"
+    return (f"Текущее время: {weather.current_time}\n"
             f"Название города: {weather.city}\n"
             f"Погодные условия: {weather.weather_type}\n"
             f"Текущая температура: {weather.temperature} "
@@ -37,13 +35,3 @@ def _format_gradus_ending(temp: Celsius) -> str:
         return "a"
     else:
         return "ов"
-
-
-def _format_time(time: Unix_time) -> datetime:
-    """
-    Меняет время формата юникс на формат ЧЧ:ММ:СС+ЧЧ:ММ
-    params: time: время формата юникс
-    returns: время в формате datetime
-    """
-    date = datetime.utcfromtimestamp(time)
-    return date.astimezone()

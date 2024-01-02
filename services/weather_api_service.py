@@ -6,22 +6,20 @@ import requests
 from dataclasses import dataclass
 import json
 from json.decoder import JSONDecodeError
-
 from typing import TypeAlias
-
 from http import HTTPStatus
+from datetime import datetime
 
 import services.config
 from services import exceptions
 
 Celsius: TypeAlias = int
 metres_per_sec: TypeAlias = int
-Unix_time: TypeAlias = int
 
 
 @dataclass(slots=True, frozen=True)
 class Weather:
-    current_time: Unix_time
+    current_time: datetime
     city: str
 
     weather_type: str
@@ -79,8 +77,6 @@ def _parse_openweather_response(openweather_response: str) -> Weather:
     try:
         openweather_dict = json.loads(openweather_response)
     except JSONDecodeError:
-        print("""По неизвестным причинам прогноз погоды получить невозможно,
-              попробуйте повторить запрос через некоторое время""")
         raise exceptions.APIServiceError()
     return Weather(
         current_time=_parse_current_time(openweather_dict),
@@ -92,16 +88,17 @@ def _parse_openweather_response(openweather_response: str) -> Weather:
     )
 
 
-def _parse_current_time(openweather_dict: dict) -> Unix_time:
+def _parse_current_time(openweather_dict: dict) -> datetime:
     """
     Получает текущее время из словаря
     params: openweather_dict: словарь
-    returns: время в юникс формате
+    returns: время в datetime формате
     """
     try:
-        return openweather_dict["dt"]
+        date = datetime.fromtimestamp(openweather_dict["dt"])
+        return date.astimezone()
     except KeyError:
-        raise exceptions.BaseError()
+        raise exceptions.APIServiceError()
 
 
 def _parse_city_name(openweather_dict: dict) -> str:
@@ -113,7 +110,7 @@ def _parse_city_name(openweather_dict: dict) -> str:
     try:
         return openweather_dict["name"]
     except KeyError:
-        raise exceptions.BaseError()
+        raise exceptions.APIServiceError()
 
 
 def _parse_temperature(openweather_dict: dict) -> Celsius:
@@ -125,7 +122,7 @@ def _parse_temperature(openweather_dict: dict) -> Celsius:
     try:
         return round(openweather_dict["main"]["temp"])
     except KeyError:
-        raise exceptions.BaseError()
+        raise exceptions.APIServiceError()
 
 
 def _parse_temp_feels_like(openweather_dict) -> Celsius:
@@ -137,7 +134,7 @@ def _parse_temp_feels_like(openweather_dict) -> Celsius:
     try:
         return round(openweather_dict["main"]["feels_like"])
     except KeyError:
-        raise exceptions.BaseError()
+        raise exceptions.APIServiceError()
 
 
 def _parse_wind_speed(openweather_dict: dict) -> metres_per_sec:
@@ -149,7 +146,7 @@ def _parse_wind_speed(openweather_dict: dict) -> metres_per_sec:
     try:
         return round(openweather_dict["wind"]["speed"])
     except KeyError:
-        raise exceptions.BaseError()
+        raise exceptions.APIServiceError()
 
 
 def _parse_weather_type(openweather_dict: dict) -> str:
@@ -161,4 +158,4 @@ def _parse_weather_type(openweather_dict: dict) -> str:
     try:
         return str(openweather_dict["weather"][0]["description"])
     except (KeyError, IndexError):
-        raise exceptions.BaseError()
+        raise exceptions.APIServiceError()
