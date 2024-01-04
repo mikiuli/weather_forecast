@@ -2,59 +2,24 @@ import sqlite3
 
 import services
 import database
+import lexicon
+import decorators
 
 from enum import StrEnum
 import sys
-from functools import wraps
-from typing import Callable, Any
 from http import HTTPStatus
-
-TEXT = {
-    "start_text": ("Напишите '1', чтобы получить погоду в вашем городе\n"
-                   "Напишите '2', чтобы получить погоду в любом другом "
-                   "городе\n"
-                   "Напишите '3', чтобы посмотреть историю запросов\n"
-                   "Напишите '4', чтобы удалить историю запросов\n"
-                   "Напишите '5', чтобы выйти из приложения"),
-    "wrong_text": "Вы написали что-то не то, попробуйте ещё раз",
-    "print_city_name_text": "Напишите название города",
-    "wrong_city_name_text": ("В названии была допущена ошибка\n"
-                             "Введите правильное название города"),
-    "requests_number_text": ("Введите количество запросов, "
-                             "которое Вы хотите получить"),
-    "delete_history_text": "Вся история запросов удалена",
-    "app_cant_work_text": ("К сожалению, приложение не может продолжать "
-                           "свою работу.\n"
-                           "Перезапустите его и выполните запрос заново")
-}
 
 CUSTOM_EXCEPTIONS = (services.exceptions.CantGetUserCityError,
                      services.exceptions.APIServiceError,
                      services.exceptions.WrongAPIError,
                      services.exceptions.UnspecifiedError,
+                     services.exceptions.InternetIsNotAvailable,
                      database.exceptions.NoConnectionWithDBError)
+INTERNET_CONNECTION_ERROR = services.exceptions.InternetIsNotAvailable
 
 
-def errors_manager(custom_exceptions: tuple[Any, ...]) -> Callable:
-    """
-    Отлавливает пользовательские ошибки и завершает работу программы
-    params: custom_exceptions: кортеж пользовательских ошибок
-    returns: -
-    """
-    def decorator(func) -> Callable:
-        @wraps(func)
-        def wrapper(*args, **kwargs) -> Callable:
-            try:
-                func(*args, **kwargs)
-            except custom_exceptions as e:
-                print(e)
-                exit_app()
-            return func
-        return wrapper
-    return decorator
-
-
-@errors_manager(CUSTOM_EXCEPTIONS)
+@decorators.errors_manager(CUSTOM_EXCEPTIONS)
+@decorators.internet_manager(INTERNET_CONNECTION_ERROR)
 def get_local_weather(connection: sqlite3.Connection) -> None:
     """
     Выводит к консоль информацию о погоде в текущем местоположении
@@ -68,39 +33,40 @@ def get_local_weather(connection: sqlite3.Connection) -> None:
     print(services.format_weather(weather))
 
 
-@errors_manager(CUSTOM_EXCEPTIONS)
+@decorators.errors_manager(CUSTOM_EXCEPTIONS)
+@decorators.internet_manager(INTERNET_CONNECTION_ERROR)
 def get_city_weather(connection: sqlite3.Connection) -> None:
     """
     Выводит в консоль информацию о погоде в заданном пользователем городе
     params: -
     returns: -
     """
-    print(TEXT["print_city_name_text"])
+    print(lexicon.Text.print_city_name_text)
     city_name = input().strip().lower()
     weather = services.get_weather(city_name)
     while weather == HTTPStatus.NOT_FOUND:
-        print(TEXT["wrong_city_name_text"])
+        print(lexicon.Text.wrong_city_name_text)
         city_name = input().strip().lower()
         weather = services.get_weather(city_name)
     database.save_weather_request(connection, weather)
     print(services.format_weather(weather))
 
 
-@errors_manager(CUSTOM_EXCEPTIONS)
+@decorators.errors_manager(CUSTOM_EXCEPTIONS)
 def get_weather_requests_history(connection: sqlite3.Connection) -> None:
     """
     Выводит в консоль последние n запросов пользователя
     params: -
     returns: -
     """
-    print(TEXT["requests_number_text"])
+    print(lexicon.Text.requests_number_text)
     requests_number = input().strip()
     while True:
         try:
             requests_number = abs(int(requests_number))
             break
         except ValueError:
-            print(TEXT["wrong_text"])
+            print(lexicon.Text.wrong_text)
             requests_number = input().strip()
     last_requests = database.get_last_requests(connection,
                                                int(requests_number))
@@ -109,7 +75,7 @@ def get_weather_requests_history(connection: sqlite3.Connection) -> None:
         print(services.format_weather(request))
 
 
-@errors_manager(CUSTOM_EXCEPTIONS)
+@decorators.errors_manager(CUSTOM_EXCEPTIONS)
 def delete_requests_history(connection: sqlite3.Connection) -> None:
     """
     Удаляет все сохранённые запросы из базы данных
@@ -117,7 +83,7 @@ def delete_requests_history(connection: sqlite3.Connection) -> None:
     returns: -
     """
     database.delete_history(connection)
-    print(TEXT["delete_history_text"])
+    print(lexicon.Text.delete_history_text)
 
 
 def exit_app() -> None:
@@ -137,7 +103,7 @@ class Actions(StrEnum):
     APP_EXIT = "5"
 
 
-@errors_manager(CUSTOM_EXCEPTIONS)
+@decorators.errors_manager(CUSTOM_EXCEPTIONS)
 def main() -> None:
     actions = {
         Actions.WEATHER_IN_USER_LOCATION: get_local_weather,
@@ -149,7 +115,7 @@ def main() -> None:
     with database.create_connection() as connection:
         database.create_database(connection)
         while True:
-            print(TEXT["start_text"])
+            print(lexicon.Text.start_text)
             user_input = input().strip()
             if user_input in actions.keys():
                 action = actions.get(user_input)
@@ -158,11 +124,11 @@ def main() -> None:
                 except TypeError:
                     action()
             else:
-                print(TEXT["wrong_text"])
+                print(lexicon.Text.wrong_text)
 
 
 if __name__ == "__main__":
     try:
         main()
     except Exception:
-        print(TEXT["app_cant_work_text"])
+        print(lexicon.Text.app_cant_work_text)

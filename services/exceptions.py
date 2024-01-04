@@ -2,7 +2,7 @@
 
 
 class CantGetUserCityError(Exception):
-    """Программа не может получить название Вашего города"""
+    """Программа не может получить название города пользователя"""
     def __init__(self) -> None:
         message = "Программа не может определить Ваше местоположение"
         super().__init__(message)
@@ -34,4 +34,11 @@ class UnspecifiedError(Exception):
     def __init__(self) -> None:
         message = ("Произошла ошибка при попытке связаться с сервером, "
                    "попробуйте перезапустить программу")
+        super().__init__(message)
+
+
+class InternetIsNotAvailable(Exception):
+    """Нет доступа к интернету"""
+    def __init__(self) -> None:
+        message = "Для работы программы необходимо подключиться к интернету"
         super().__init__(message)

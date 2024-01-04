@@ -1,0 +1,50 @@
+"""Декораторы для функций из weather_forecast для отлова предполагаемых
+ошибок"""
+
+
+import requests
+
+import sys
+from typing import Any, Callable
+from functools import wraps
+
+
+def internet_manager(internet_connection_error) -> Callable:
+    """
+    Декоратор
+    Проверяет подключение пользователя к интернету,
+    возвращает ошибку при его отсутствии
+    params: func: функция, чувствительная к наличию интернета
+    returns: декоратор"""
+    def decorator(func) -> Callable:
+        @wraps(func)
+        def wrapper(*args, **kwargs) -> Callable:
+            try:
+                requests.get("https://github.com", timeout=3)
+            except Exception:
+                raise internet_connection_error()
+            func(*args, **kwargs)
+            return func
+        return wrapper
+    return decorator
+
+
+def errors_manager(custom_exceptions: tuple[Any, ...]) -> Callable:
+    """
+    Декоратор
+    Отлавливает пользовательские ошибки и завершает работу программы
+    при наличии ошибок
+    params: custom_exceptions: кортеж пользовательских ошибок
+    returns: декоратор
+    """
+    def decorator(func) -> Callable:
+        @wraps(func)
+        def wrapper(*args, **kwargs) -> Callable:
+            try:
+                func(*args, **kwargs)
+            except custom_exceptions as e:
+                print(e)
+                sys.exit()
+            return func
+        return wrapper
+    return decorator
