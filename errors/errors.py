@@ -1,4 +1,13 @@
-"""Пользовательские исключения для пакета services"""
+"""Пользовательские исключения"""
+
+from collections import namedtuple
+
+
+class NoConnectionWithDBError(Exception):
+    """Нет связи с базой данных"""
+    def __init__(self) -> None:
+        message = "Проблемы с подключением к базе данных"
+        super().__init__(message)
 
 
 class CantGetUserCityError(Exception):
@@ -42,3 +51,16 @@ class InternetIsNotAvailable(Exception):
     def __init__(self) -> None:
         message = "Для работы программы необходимо подключиться к интернету"
         super().__init__(message)
+
+
+CustomException = namedtuple("CustomException", """CantGetUserCityError
+                             APIServiceError WrongAPIError UnspecifiedError
+                             InternetIsNotAvailable NoConnectionWithDBError""")
+
+
+custom_exceptions = CustomException(CantGetUserCityError,
+                                    APIServiceError,
+                                    WrongAPIError,
+                                    UnspecifiedError,
+                                    InternetIsNotAvailable,
+                                    NoConnectionWithDBError)

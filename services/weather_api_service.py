@@ -11,7 +11,7 @@ from http import HTTPStatus
 from datetime import datetime
 
 import services.config
-from services import exceptions
+from errors.errors import custom_exceptions
 
 Celsius: TypeAlias = int
 metres_per_sec: TypeAlias = int
@@ -55,17 +55,17 @@ def _get_openweather_response(city_name: str) -> str:
     try:
         response = requests.get(url=url, timeout=3)
     except requests.exceptions.Timeout:
-        raise exceptions.TimeoutServiceError()
+        raise custom_exceptions.TimeoutServiceError()
     if response.status_code == HTTPStatus.OK:
         return response.text
     elif response.status_code == HTTPStatus.NOT_FOUND:
         return response.status_code
     elif response.status_code == HTTPStatus.UNAUTHORIZED:
-        raise exceptions.WrongAPIError()
+        raise custom_exceptions.WrongAPIError()
     elif response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR:
-        raise exceptions.APIServiceError()
+        raise custom_exceptions.APIServiceError()
     else:
-        raise exceptions.UnspecifiedError()
+        raise custom_exceptions.UnspecifiedError()
 
 
 def _parse_openweather_response(openweather_response: str) -> Weather:
@@ -77,7 +77,7 @@ def _parse_openweather_response(openweather_response: str) -> Weather:
     try:
         openweather_dict = json.loads(openweather_response)
     except JSONDecodeError:
-        raise exceptions.APIServiceError()
+        raise custom_exceptions.APIServiceError()
     return Weather(
         current_time=_parse_current_time(openweather_dict),
         city=_parse_city_name(openweather_dict),
@@ -98,7 +98,7 @@ def _parse_current_time(openweather_dict: dict) -> datetime:
         date = datetime.fromtimestamp(openweather_dict["dt"])
         return date.astimezone()
     except KeyError:
-        raise exceptions.APIServiceError()
+        raise custom_exceptions.APIServiceError()
 
 
 def _parse_city_name(openweather_dict: dict) -> str:
@@ -110,7 +110,7 @@ def _parse_city_name(openweather_dict: dict) -> str:
     try:
         return openweather_dict["name"]
     except KeyError:
-        raise exceptions.APIServiceError()
+        raise custom_exceptions.APIServiceError()
 
 
 def _parse_temperature(openweather_dict: dict) -> Celsius:
@@ -122,7 +122,7 @@ def _parse_temperature(openweather_dict: dict) -> Celsius:
     try:
         return round(openweather_dict["main"]["temp"])
     except KeyError:
-        raise exceptions.APIServiceError()
+        raise custom_exceptions.APIServiceError()
 
 
 def _parse_temp_feels_like(openweather_dict) -> Celsius:
@@ -134,7 +134,7 @@ def _parse_temp_feels_like(openweather_dict) -> Celsius:
     try:
         return round(openweather_dict["main"]["feels_like"])
     except KeyError:
-        raise exceptions.APIServiceError()
+        raise custom_exceptions.APIServiceError()
 
 
 def _parse_wind_speed(openweather_dict: dict) -> metres_per_sec:
@@ -146,7 +146,7 @@ def _parse_wind_speed(openweather_dict: dict) -> metres_per_sec:
     try:
         return round(openweather_dict["wind"]["speed"])
     except KeyError:
-        raise exceptions.APIServiceError()
+        raise custom_exceptions.APIServiceError()
 
 
 def _parse_weather_type(openweather_dict: dict) -> str:
@@ -158,4 +158,4 @@ def _parse_weather_type(openweather_dict: dict) -> str:
     try:
         return str(openweather_dict["weather"][0]["description"])
     except (KeyError, IndexError):
-        raise exceptions.APIServiceError()
+        raise custom_exceptions.APIServiceError()

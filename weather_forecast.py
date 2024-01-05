@@ -4,27 +4,20 @@ import services
 import database
 import lexicon
 import decorators
+import errors
 
 from enum import StrEnum
 import sys
 from http import HTTPStatus
 
-CUSTOM_EXCEPTIONS = (services.exceptions.CantGetUserCityError,
-                     services.exceptions.APIServiceError,
-                     services.exceptions.WrongAPIError,
-                     services.exceptions.UnspecifiedError,
-                     services.exceptions.InternetIsNotAvailable,
-                     database.exceptions.NoConnectionWithDBError)
-INTERNET_CONNECTION_ERROR = services.exceptions.InternetIsNotAvailable
 
-
-@decorators.errors_manager(CUSTOM_EXCEPTIONS)
-@decorators.internet_manager(INTERNET_CONNECTION_ERROR)
+@decorators.errors_manager(errors.custom_exceptions)
+@decorators.internet_manager(errors.custom_exceptions.InternetIsNotAvailable)
 def get_local_weather(connection: sqlite3.Connection) -> None:
     """
     Выводит к консоль информацию о погоде в текущем местоположении
     пользователя
-    params: -
+    params: connection: подключение к базе данных
     returns: -
     """
     user_city_name = services.get_user_city_name()
@@ -33,12 +26,12 @@ def get_local_weather(connection: sqlite3.Connection) -> None:
     print(services.format_weather(weather))
 
 
-@decorators.errors_manager(CUSTOM_EXCEPTIONS)
-@decorators.internet_manager(INTERNET_CONNECTION_ERROR)
+@decorators.errors_manager(errors.custom_exceptions)
+@decorators.internet_manager(errors.custom_exceptions.InternetIsNotAvailable)
 def get_city_weather(connection: sqlite3.Connection) -> None:
     """
     Выводит в консоль информацию о погоде в заданном пользователем городе
-    params: -
+    params: connection: подключение к базе данных
     returns: -
     """
     print(lexicon.Text.print_city_name_text)
@@ -52,19 +45,22 @@ def get_city_weather(connection: sqlite3.Connection) -> None:
     print(services.format_weather(weather))
 
 
-@decorators.errors_manager(CUSTOM_EXCEPTIONS)
+@decorators.errors_manager(errors.custom_exceptions)
 def get_weather_requests_history(connection: sqlite3.Connection) -> None:
     """
     Выводит в консоль последние n запросов пользователя
-    params: -
+    params: connection: подключение к базе данных
     returns: -
     """
     print(lexicon.Text.requests_number_text)
     requests_number = input().strip()
     while True:
         try:
-            requests_number = abs(int(requests_number))
-            break
+            requests_number = int(requests_number)
+            if requests_number < 0:
+                raise ValueError
+            else:
+                break
         except ValueError:
             print(lexicon.Text.wrong_text)
             requests_number = input().strip()
@@ -75,11 +71,11 @@ def get_weather_requests_history(connection: sqlite3.Connection) -> None:
         print(services.format_weather(request))
 
 
-@decorators.errors_manager(CUSTOM_EXCEPTIONS)
+@decorators.errors_manager(errors.custom_exceptions)
 def delete_requests_history(connection: sqlite3.Connection) -> None:
     """
     Удаляет все сохранённые запросы из базы данных
-    params: -
+    params: connection: подключение к базе данных
     returns: -
     """
     database.delete_history(connection)
@@ -103,7 +99,7 @@ class Actions(StrEnum):
     APP_EXIT = "5"
 
 
-@decorators.errors_manager(CUSTOM_EXCEPTIONS)
+@decorators.errors_manager(errors.custom_exceptions)
 def main() -> None:
     actions = {
         Actions.WEATHER_IN_USER_LOCATION: get_local_weather,

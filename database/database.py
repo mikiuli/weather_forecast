@@ -3,7 +3,7 @@
 import sqlite3
 
 from services.weather_api_service import Weather
-from database.exceptions import NoConnectionWithDBError
+from errors.errors import custom_exceptions
 
 CREATE_TABLE_QUERY = """CREATE TABLE IF NOT EXISTS Weather_requests (
     id INTEGER PRIMARY KEY,
@@ -33,7 +33,7 @@ def create_connection() -> sqlite3.Connection:
     try:
         connection = sqlite3.connect("weather_forecast.db")
     except sqlite3.OperationalError:
-        raise NoConnectionWithDBError()
+        raise custom_exceptions.NoConnectionWithDBError()
     return connection
 
 
@@ -48,7 +48,7 @@ def create_database(connection: sqlite3.Connection) -> None:
         cursor = connection.cursor()
         cursor.execute(CREATE_TABLE_QUERY)
     except sqlite3.OperationalError:
-        raise NoConnectionWithDBError()
+        raise custom_exceptions.NoConnectionWithDBError()
 
 
 def save_weather_request(connection: sqlite3.Connection,
@@ -71,7 +71,7 @@ def save_weather_request(connection: sqlite3.Connection,
 
         connection.commit()
     except sqlite3.OperationalError:
-        raise NoConnectionWithDBError()
+        raise custom_exceptions.NoConnectionWithDBError()
 
 
 def get_last_requests(connection: sqlite3.Connection,
@@ -98,7 +98,7 @@ def get_last_requests(connection: sqlite3.Connection,
             requests_list.append(weather)
         return requests_list
     except sqlite3.OperationalError:
-        raise NoConnectionWithDBError()
+        raise custom_exceptions.NoConnectionWithDBError()
 
 
 def delete_history(connection: sqlite3.Connection) -> None:
@@ -112,4 +112,4 @@ def delete_history(connection: sqlite3.Connection) -> None:
         cursor.execute(DELETE_ALL_REQUESTS_QUERY)
         connection.commit()
     except sqlite3.OperationalError:
-        raise NoConnectionWithDBError()
+        raise custom_exceptions.NoConnectionWithDBError()
