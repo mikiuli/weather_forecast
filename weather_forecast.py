@@ -56,6 +56,8 @@ def get_weather_requests_history(connection: sqlite3.Connection) -> None:
     requests_number = input().strip()
     while True:
         try:
+            if "." in requests_number:
+                raise ValueError
             requests_number = int(requests_number)
             if requests_number < 0:
                 raise ValueError
