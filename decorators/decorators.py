@@ -1,11 +1,12 @@
 """Декораторы для функций из weather_forecast для отлова предполагаемых
 ошибок"""
 
-import requests
-
 import sys
 from typing import Callable
 from functools import wraps
+
+import requests
+
 from errors.errors import CustomExceptionTuple
 
 

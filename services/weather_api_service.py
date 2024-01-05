@@ -1,14 +1,14 @@
 """Получает погоду с сервиса openweathermap с помощью библиотеки requests,
 отправляет в формате Weather"""
 
-import requests
-
 from dataclasses import dataclass
 import json
 from json.decoder import JSONDecodeError
 from typing import TypeAlias
 from http import HTTPStatus
 from datetime import datetime
+
+import requests
 
 import services.config
 from errors.errors import custom_exceptions

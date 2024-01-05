@@ -1,14 +1,13 @@
 import sqlite3
+from enum import StrEnum
+import sys
+from http import HTTPStatus
 
 import services
 import database
 import lexicon
 import decorators
 import errors
-
-from enum import StrEnum
-import sys
-from http import HTTPStatus
 
 
 @decorators.errors_manager(errors.custom_exceptions)
