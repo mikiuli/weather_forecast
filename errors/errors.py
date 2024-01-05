@@ -53,14 +53,15 @@ class InternetIsNotAvailable(Exception):
         super().__init__(message)
 
 
-CustomException = namedtuple("CustomException", """CantGetUserCityError
-                             APIServiceError WrongAPIError UnspecifiedError
-                             InternetIsNotAvailable NoConnectionWithDBError""")
+CustomExceptionTuple = namedtuple("CustomException", """CantGetUserCityError
+                                  APIServiceError WrongAPIError
+                                  UnspecifiedError InternetIsNotAvailable
+                                  NoConnectionWithDBError""")
 
 
-custom_exceptions = CustomException(CantGetUserCityError,
-                                    APIServiceError,
-                                    WrongAPIError,
-                                    UnspecifiedError,
-                                    InternetIsNotAvailable,
-                                    NoConnectionWithDBError)
+custom_exceptions = CustomExceptionTuple(CantGetUserCityError,
+                                         APIServiceError,
+                                         WrongAPIError,
+                                         UnspecifiedError,
+                                         InternetIsNotAvailable,
+                                         NoConnectionWithDBError)

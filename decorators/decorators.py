@@ -1,12 +1,12 @@
 """Декораторы для функций из weather_forecast для отлова предполагаемых
 ошибок"""
 
-
 import requests
 
 import sys
-from typing import Any, Callable
+from typing import Callable
 from functools import wraps
+from errors.errors import CustomExceptionTuple
 
 
 def internet_manager(internet_connection_error) -> Callable:
@@ -29,12 +29,14 @@ def internet_manager(internet_connection_error) -> Callable:
     return decorator
 
 
-def errors_manager(custom_exceptions: tuple[Any, ...]) -> Callable:
+def errors_manager(custom_exceptions:
+                   CustomExceptionTuple) -> Callable:
     """
     Декоратор
     Отлавливает пользовательские ошибки и завершает работу программы
     при наличии ошибок
     params: custom_exceptions: кортеж пользовательских ошибок
+    из errors.errors
     returns: декоратор
     """
     def decorator(func) -> Callable:
