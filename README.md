@@ -49,33 +49,33 @@ ____
 и место для ввода номера пользователем. Необходимо ввести цифру
 и нажать Enter.\
  \
-![1](https://github.com/mikiuli/weather_forecast/assets/141579432/e2fbce85-af61-4dcb-9cbb-dc3f6c56ddf6) \
+![1](https://github.com/mikiuli/weather_forecast/assets/141579432/e2fbce85-af61-4dcb-9cbb-dc3f6c56ddf6)
 ____
 В случае некорректного ввода приложение уведомляет об этом и требует ввести
 запрос заново.\
  \
-![2](https://github.com/mikiuli/weather_forecast/assets/141579432/a1c6ebcc-cd41-44c8-85a9-bdac54c9f2f5) \
+![2](https://github.com/mikiuli/weather_forecast/assets/141579432/a1c6ebcc-cd41-44c8-85a9-bdac54c9f2f5)
 ____
 Когда запрос выполнен, снова появляется стартовый текст.\
  \
-![3](https://github.com/mikiuli/weather_forecast/assets/141579432/135da9ab-029e-4769-95f5-3a9350bdf5f5) \
+![3](https://github.com/mikiuli/weather_forecast/assets/141579432/135da9ab-029e-4769-95f5-3a9350bdf5f5)
 ____
 Если пользователь хочет получить прогноз погоды определённого города(2),
 будет предложена строка, куда необходимо ввести название города на русском языке.\
  \
-![4](https://github.com/mikiuli/weather_forecast/assets/141579432/174c3cda-a389-428a-b6b9-e9599f1cb3a4) \
+![4](https://github.com/mikiuli/weather_forecast/assets/141579432/174c3cda-a389-428a-b6b9-e9599f1cb3a4)
 ____
 Если в названии допущена грамматическая ошибка или введены некорректные данные,
 программа будет продолжать просить ввести название города до тех пор,
 пока от внешнего сервера не придёт ответ с кодом 200.\
  \
-![5](https://github.com/mikiuli/weather_forecast/assets/141579432/9ae6180e-8fa4-41a8-ac0a-46c0b0f6179b) \
+![5](https://github.com/mikiuli/weather_forecast/assets/141579432/9ae6180e-8fa4-41a8-ac0a-46c0b0f6179b)
 ____
 При получении истории запросов(3) необходимо ввести число запросов. Ожидается введение
 целого положительного числа, остальные числа обрабатываться не будут и программа
 будет продолжать просить ввести число.\
  \
-![6](https://github.com/mikiuli/weather_forecast/assets/141579432/3b4c59e6-912f-40ad-ac26-eec947a50a40) \
+![6](https://github.com/mikiuli/weather_forecast/assets/141579432/3b4c59e6-912f-40ad-ac26-eec947a50a40)
 ____
 Получение прогноза погоды(1), удаление истории запросов(4) и выход из приложения(5)
 происходят сразу после ввода номера.
