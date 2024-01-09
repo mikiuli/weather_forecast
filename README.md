@@ -38,7 +38,7 @@ ____
 ```venv\Scripts\activate.ps1``` \
 для macOS и Linux: \
 ```source venv/bin/activate```
-6. Загрузить файл requirements.txt:
+6. Загрузить файл requirements.txt: \
 ```pip install -r requirements.txt```
 7. Запустить программу из корневого файла weather_forecast.py
 
