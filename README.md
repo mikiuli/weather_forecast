@@ -30,12 +30,12 @@ ____
 4. Открыть в среде разработки, и, находясь в корневом файле weather_forecast.py,
 создать виртуальное окружение: \
 для Windows: \
-```python -m venv venv```
+```python -m venv venv``` \
 для macOS и Linux: \
-```python3 -m venv venv```
+```python3 -m venv venv``` \
 активировать его: \
 для Windows: \
-```venv\Scripts\activate.ps1```
+```venv\Scripts\activate.ps1``` \
 для macOS и Linux: \
 ```source venv/bin/activate```
 6. Загрузить файл requirements.txt:
