@@ -28,15 +28,15 @@ ____
 2. Установить среду разработки, например, [VSCode](https://code.visualstudio.com/) или [Pycharm](https://www.jetbrains.com/pycharm/)
 3. Клонировать репозиторий на локальный компьютер [как клонировать](https://docs.github.com/ru/repositories/creating-and-managing-repositories/cloning-a-repository)
 4. Открыть в среде разработки, и, находясь в корневом файле weather_forecast.py,
-создать виртуальное окружение:
-для Windows:
+создать виртуальное окружение: \
+для Windows: \
 ```python -m venv venv```
-для macOS и Linux:
+для macOS и Linux: \
 ```python3 -m venv venv```
-активировать его:
-для Windows:
+активировать его: \
+для Windows: \
 ```venv\Scripts\activate.ps1```
-для macOS и Linux:
+для macOS и Linux: \
 ```source venv/bin/activate```
 6. Загрузить файл requirements.txt:
 ```pip install -r requirements.txt```
