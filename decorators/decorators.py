@@ -19,13 +19,12 @@ def internet_manager(internet_connection_error) -> Callable:
     returns: декоратор"""
     def decorator(func) -> Callable:
         @wraps(func)
-        def wrapper(*args, **kwargs) -> Callable:
+        def wrapper(*args, **kwargs) -> None:
             try:
                 requests.get("https://github.com", timeout=3)
             except Exception:
                 raise internet_connection_error()
             func(*args, **kwargs)
-            return func
         return wrapper
     return decorator
 
@@ -42,12 +41,11 @@ def errors_manager(custom_exceptions:
     """
     def decorator(func) -> Callable:
         @wraps(func)
-        def wrapper(*args, **kwargs) -> Callable:
+        def wrapper(*args, **kwargs) -> None:
             try:
                 func(*args, **kwargs)
             except custom_exceptions as e:
                 print(e)
                 sys.exit()
-            return func
         return wrapper
     return decorator
