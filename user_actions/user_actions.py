@@ -146,10 +146,12 @@ def _execute_action_by_name(ipinfo_access_token: str,
 
 
 @decorators.errors_manager(errors.MyBaseError)
-def start_app(ipinfo_access_token: str,
-              openweatherAPI: str) -> None:
+def process_app(ipinfo_access_token: str,
+                openweatherAPI: str) -> None:
     """
-    Осуществляет выход из приложения
+    Выполняет действия для старта приложения: создаёт соединение с базой данных,
+    создаёт таблицу, если она отсутствует, запускает цикл приложения,
+    закрывает соединение после выхода из приложения
     params: openweatherAPI: API-ключ от openweathermap.org,
     ipinfo_access_token: токен для использования библиотеки ipinfo
     returns: -

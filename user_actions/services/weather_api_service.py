@@ -84,6 +84,11 @@ def get_weather_from_openweatherAPI(openweatherAPI: str,
 
 
 def _check_status_code_OK(status_code: requests.status_codes) -> bool:
+    """
+    Проверяет статус код, который присылает сервер
+    params: status_code: код ответа сервера
+    returns: булевое значение
+    """
     if status_code == HTTPStatus.OK:
         return True
     if status_code == HTTPStatus.NOT_FOUND:
@@ -100,7 +105,7 @@ def _get_openweather_response(openweatherAPI: str, city_name: str) -> dict:
     Получает ответ от сервера, райзит ошибку, если проблемы с соединением
     params: openweatherAPI: API-ключ от openweathermap.org,
     city_name: имя города, погоду в котором хочет получить пользователь
-    returns: Возвращает тело полученного ответа в виде текса
+    returns: Возвращает тело полученного ответа в виде текста
     """
     url = ("https://api.openweathermap.org/data/2.5/weather?"
            f"appid={openweatherAPI}&"
