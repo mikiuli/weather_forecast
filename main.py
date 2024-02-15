@@ -1,5 +1,4 @@
 import user_actions
-from user_actions import lexicon
 
 from environs import Env
 
@@ -22,4 +21,4 @@ if __name__ == "__main__":
     try:
         main()
     except Exception:
-        print(lexicon.Text.app_cant_work_text)
+        print(user_actions.lexicon.Text.app_cant_work_text)

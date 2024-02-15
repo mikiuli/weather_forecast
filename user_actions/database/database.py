@@ -4,7 +4,7 @@ from contextlib import contextmanager
 import sqlite3
 
 from user_actions.services.weather_api_service import Weather
-import user_actions.errors.errors as errors
+from user_actions.errors import errors
 
 CREATE_TABLE_QUERY = """CREATE TABLE IF NOT EXISTS weather_data (
     id INTEGER PRIMARY KEY,

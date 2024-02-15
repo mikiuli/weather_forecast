@@ -4,11 +4,7 @@ import sqlite3
 from enum import StrEnum
 import sys
 
-from user_actions import services
-from user_actions import database
-from user_actions import lexicon
-from user_actions import decorators
-from user_actions import errors
+from user_actions import services, database, lexicon, decorators, errors
 
 
 @decorators.errors_manager(errors.MyBaseError)
