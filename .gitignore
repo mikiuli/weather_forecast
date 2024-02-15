@@ -1,0 +1,7 @@
+task
+venv/
+.pre-commit-config.yaml
+__pycache__/
+weather_forecast.db
+.env
+setup.cfg
